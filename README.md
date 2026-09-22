@@ -14,7 +14,7 @@ AgroPulse es un sistema distribuido para la monitorización de humedad y control
 
 1. **Clonar e Instalar la App Móvil:**
    ```bash
-   git clone <tu-repo>
+   git clone https://github.com/juannsaenzz/TP4-AgroPulse
    cd agropulse
    npm install
    ```
