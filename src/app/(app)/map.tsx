@@ -102,14 +102,7 @@ export default function MapScreen() {
     }
   }
 
-  if (loading) {
-    return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }]}>
-        <ActivityIndicator size="large" color="#12723D" />
-        <Text style={{ marginTop: 10, color: 'gray' }}>Cargando satélite y loteos...</Text>
-      </View>
-    );
-  }
+
 
   const geojson = {
     type: "FeatureCollection",
@@ -136,7 +129,7 @@ export default function MapScreen() {
   const centerLng = userLocation ? userLocation.lng : -58.0130;
   const zoomLevel = userLocation ? 15 : 11;
 
-  const mapHtml = `
+  const mapHtml = useMemo(() => `
     <!DOCTYPE html>
     <html>
     <head>
@@ -210,7 +203,16 @@ export default function MapScreen() {
       </script>
     </body>
     </html>
-  `;
+    `, [userLocation]);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }]}>
+        <ActivityIndicator size="large" color="#12723D" />
+        <Text style={{ marginTop: 10, color: 'gray' }}>Cargando satélite y loteos...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -238,6 +240,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
   map: { flex: 1 },
 });
+
+
+
 
 
 

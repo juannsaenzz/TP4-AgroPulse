@@ -45,3 +45,7 @@ example
 # env files
 .env
 infra/.env
+
+# Entregables
+*.mp4
+*.pdf
