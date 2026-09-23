@@ -58,9 +58,18 @@ async function main() {
       const { data: valves } = await supabase.from('valves').select('plot_id, status');
       
       for (const station of stations) {
+        const { data: latestReading } = await supabase
+          .from('readings')
+          .select('moisture_pct')
+          .eq('station_id', station.id)
+          .order('measured_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        let currentMoisture = latestReading ? latestReading.moisture_pct : 18;
+
         if (!stationState[station.id]) {
           stationState[station.id] = { 
-            moisture: Math.floor(Math.random() * 40) + 15, 
             temp: Math.floor(Math.random() * 10) + 20 
           };
         }
@@ -70,10 +79,12 @@ async function main() {
         const isIrrigating = stationValve && stationValve.status === 'open';
         
         if (isIrrigating) {
-          state.moisture = Math.min(100, state.moisture + (Math.random() * 1.0 + 0.5));
+          currentMoisture = Math.min(100, currentMoisture + (Math.random() * 1.0 + 0.5));
         } else {
-          state.moisture = Math.max(0, state.moisture - (Math.random() * 0.2 + 0.1));
+          currentMoisture = Math.max(0, currentMoisture - (Math.random() * 0.2 + 0.1));
         }
+        
+        state.moisture = currentMoisture;
         
         state.temp = state.temp + (Math.random() * 1 - 0.5);
         state.temp = Math.max(10, Math.min(45, state.temp));
@@ -176,6 +187,7 @@ async function main() {
 }
 
 main();
+
 
 
 
