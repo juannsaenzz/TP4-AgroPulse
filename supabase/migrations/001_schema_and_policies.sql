@@ -90,11 +90,46 @@ ALTER TABLE valves ENABLE ROW LEVEL SECURITY;
 ALTER TABLE irrigation_commands ENABLE ROW LEVEL SECURITY;
 ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Read access for members" ON plots FOR SELECT USING (true);
-CREATE POLICY "Read access for members" ON stations FOR SELECT USING (true);
-CREATE POLICY "Read access for members" ON valves FOR SELECT USING (true);
-CREATE POLICY "Read access for members" ON irrigation_commands FOR SELECT USING (true);
-CREATE POLICY "Read access for members" ON alerts FOR SELECT USING (true);
+CREATE POLICY "Read access for members" ON plots FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM memberships 
+    WHERE user_id = auth.uid() AND organization_id = plots.organization_id
+  )
+);
+
+CREATE POLICY "Read access for members" ON stations FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM plots p
+    JOIN memberships m ON m.organization_id = p.organization_id
+    WHERE p.id = stations.plot_id AND m.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Read access for members" ON valves FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM plots p
+    JOIN memberships m ON m.organization_id = p.organization_id
+    WHERE p.id = valves.plot_id AND m.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Read access for members" ON alerts FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM plots p
+    JOIN memberships m ON m.organization_id = p.organization_id
+    WHERE p.id = alerts.plot_id AND m.user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Read access for members" ON irrigation_commands FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM valves v
+    JOIN plots p ON p.id = v.plot_id
+    JOIN memberships m ON m.organization_id = p.organization_id
+    WHERE v.id = irrigation_commands.valve_id AND m.user_id = auth.uid()
+  )
+);
+
 
 CREATE POLICY "Insert commands for non-advisors" ON irrigation_commands 
 FOR INSERT WITH CHECK (
